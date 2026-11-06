@@ -1,27 +1,8 @@
-#!/usr/bin/env Rscript
-# ---------------------------------------------------------------------------
-# PCA + PERMANOVA
-# Reads a VCF + popmap (Stacks format: SampleID<TAB>PopulationName)
-# 1) Runs a PCA on SNP genotype data (via adegenet::glPca) and plots PC1 vs PC2
-#    colored by population.
-# 2) Runs a PERMANOVA (vegan::adonis2) testing whether genetic distance
-#    (Euclidean, computed from SNP allele dosages) differs by population.
-# ---------------------------------------------------------------------------
-
-suppressMessages({
-  library(vcfR)
-  library(adegenet)
-  library(vegan)
-  library(ggplot2)
-  library(parallel)
-})
-
-n_cores <- max(1, detectCores() - 1)
-cat("Using", n_cores, "cores for parallel PCA computation\n")
-
-
-# ---- paths -----------------------------------------------------------------
-setwd(dirname(normalizePath(sub("--file=", "", grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)))))
+library(vcfR)
+library(adegenet)
+library(vegan)
+library(ggplot2)
+library(parallel)
 
 vcf_file      <- "populations.snps.vcf"
 popmap_file   <- "llf_popmap.txt"
