@@ -1,39 +1,8 @@
-#!/usr/bin/env Rscript
-# ---------------------------------------------------------------------------
-# DAPC (Discriminant Analysis of Principal Components)
-#
-# Reads a VCF + popmap (Stacks format: SampleID<TAB>PopulationName) and runs
-# the same analysis pipeline twice:
-#   1) On all individuals.
-#   2) On a subset with RomeroCanyon, PenaBlanca, UniversityArizonaPond, and
-#      WildhorsePool individuals excluded.
-#
-# For each run, the pipeline:
-#   1) Infers genetic clusters de novo using adegenet::find.clusters()
-#      (K-means on PCA-transformed genotypes, K chosen automatically by
-#      lowest BIC across K = 1..max_k).
-#   2) Runs DAPC on the inferred clusters (adegenet::dapc) and plots
-#      individuals on the first two discriminant functions, colored by
-#      inferred cluster, plus a labeled version and a text summary.
-#
-# Requirements: vcfR, adegenet, ggplot2, dplyr, ggrepel, RColorBrewer, scales
-# (This is a refactor of dapc_plot.R: the two near-identical analysis blocks
-# there have been consolidated into run_dapc_pipeline() below, called once
-# per dataset.)
-# ---------------------------------------------------------------------------
-
-suppressMessages({
-  library(vcfR)
-  library(adegenet)
-  library(ggplot2)
-  library(dplyr)
-  library(ggrepel)
-})
-
-set.seed(42)
-
-# ---- paths -------------------------------------------------------------
-setwd(dirname(normalizePath(sub("--file=", "", grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)))))
+library(vcfR)
+library(adegenet)
+library(ggplot2)
+library(dplyr)
+library(ggrepel)
 
 vcf_file    <- "populations.snps.vcf"
 popmap_file <- "llf_popmap.txt"
@@ -61,33 +30,6 @@ if (any(is.na(popmap$pop))) {
 pop(gl) <- popmap$pop
 ploidy(gl) <- 2
 
-# ---------------------------------------------------------------------------
-# run_dapc_pipeline(): shared find.clusters + DAPC + plotting + summary logic
-#
-# Arguments:
-#   gl                    genlight object (already subset, if applicable)
-#   popmap                data.frame with columns sample/pop, matching gl
-#   suffix                string appended to output filenames (e.g. "" or
-#                         "_noROM_PB_UA_WHP")
-#   exclude_pops          character vector of population names to drop from
-#                         gl/popmap before clustering (NULL = use as-is)
-#   max_k                 maximum K to test in find.clusters()
-#   cluster_name_map      optional named character vector, e.g.
-#                         c("1"="GSR","2"="ROM",...), used to relabel
-#                         numeric cluster IDs with meaningful names. Only
-#                         applied when the observed K exactly matches
-#                         length(cluster_name_map); otherwise raw numeric
-#                         cluster labels are kept (avoids partial relabeling
-#                         if K differs from what was expected).
-#   cluster_colors_fixed  optional named color vector matching the (possibly
-#                         relabeled) cluster levels. Used only when its
-#                         length matches the observed K; otherwise colors
-#                         are chosen automatically (RColorBrewer -> scales
-#                         -> rainbow fallback).
-#   summary_header        header line written at the top of the summary .txt
-#
-# Returns (invisibly): list(grp, dapc_res, dapc_df, best_k)
-# ---------------------------------------------------------------------------
 run_dapc_pipeline <- function(gl, popmap, suffix = "",
                                exclude_pops = NULL,
                                max_k = 20,
