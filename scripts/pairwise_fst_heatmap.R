@@ -1,21 +1,8 @@
-#!/usr/bin/env Rscript
-# ---------------------------------------------------------------------------
-# Pairwise Fst heatmap (AlambreTank excluded - only 1 individual)
-# Reads a VCF + popmap (Stacks format: SampleID<TAB>PopulationName)
-# Computes pairwise Weir & Cockerham Fst (via StAMPP) with bootstrapped
-# p-values and plots a heatmap with significance markers.
-# ---------------------------------------------------------------------------
-
-suppressMessages({
-  library(vcfR)
-  library(adegenet)
-  library(StAMPP)
-  library(reshape2)
-  library(ggplot2)
-})
-
-# ---- paths -----------------------------------------------------------------
-setwd(dirname(normalizePath(sub("--file=", "", grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)))))
+library(vcfR)
+library(adegenet)
+library(StAMPP)
+library(reshape2)
+library(ggplot2)
 
 vcf_file    <- "populations.snps.vcf"
 popmap_file <- "llf_popmap.txt"
