@@ -1,18 +1,9 @@
-#!/usr/bin/env Rscript
-# Simple Vertical Phylogenetic Tree
-# Adapted from /Volumes/LLF_PROJECT/filter_now/phylo_tree_simple.R to run
-# using the inputs already present in new_figs/ (populations.snps.vcf +
-# llf_popmap.txt), with all outputs written to new_figs/.
-
 library(vcfR)
 library(ape)
 library(adegenet)
 library(StAMPP)
 library(ggplot2)
 library(ggtree)
-
-# ---- paths -----------------------------------------------------------------
-setwd(dirname(normalizePath(sub("--file=", "", grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)))))
 
 # Regions
 regions <- c("HookerHotSpring" = "Galiuro Mtn", "MintSpring" = "Galiuro Mtn", "BassSpring" = "Galiuro Mtn",
@@ -35,7 +26,6 @@ colors <- c("Galiuro Mtn" = "#00BA38", "Catalina Mtn" = "#619CFF", "Rincon Mtn" 
             "Misc. Site" = "#999999", "PenaBlanca" = "gray50")
 
 
-# ---- Read VCF and popmap (local new_figs/ inputs) ---------------------------
 vcf_file    <- "populations.snps.vcf"
 popmap_file <- "llf_popmap.txt"
 
@@ -53,14 +43,10 @@ pop_map_vec <- setNames(popmap$Population, popmap$Individual)
 pop(gl) <- pop_map_vec[indNames(gl)]
 ploidy(gl) <- 2
 
-# ---- Build tree --------------------------------------------------------------
-cat("Calculating population-level Nei's genetic distance (this may take a while)...\n")
+cat("Calculating population-level Nei's genetic distance...\n")
 pop_dist <- as.dist(stamppNeisD(gl, pop = TRUE))
 tree <- nj(pop_dist)
 
-# NJ trees can occasionally produce small negative branch lengths, which is a
-# known numerical artifact. Set any negative edge lengths to 0 so branches
-# render pointing in a consistent direction.
 tree$edge.length[tree$edge.length < 0] <- 0
 
 if ("PenaBlanca" %in% tree$tip.label) {
