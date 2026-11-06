@@ -1,18 +1,8 @@
-#!/usr/bin/env Rscript
-# ADMIXTURE barplots for K = 4, 7, 8, 9, 14, 15, 19
-
-# Individuals ordered and grouped by population (from llf_popmap.txt)
-
-suppressPackageStartupMessages({
-  library(ggplot2)
-  library(dplyr)
-  library(tidyr)
-  library(forcats)
-  library(viridis)
-})
-
-
-setwd("/Users/bethhasl/Desktop/new_figs")
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(forcats)
+library(viridis)
 
 # ---- Read popmap ----
 popmap <- read.table("llf_popmap.txt", header = FALSE, sep = "\t",
